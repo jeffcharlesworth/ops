@@ -1,0 +1,21 @@
+#!/bin/bash
+# gets json list of server actions from rackspace
+# ./server-actions <server_name>
+# set environment variables OS_USERNAME OS_PASSWORD OS_TENANT_NAME
+
+# parameter is server name
+if [[ -z $RAC_AUTH_TOKEN ]]
+then
+    export RAC_AUTH_TOKEN=$(curl https://identity.api.rackspacecloud.com/v2.0/tokens \
+                                 -trace--axcii \
+                                 -X POST \
+                                 -d '{"auth":{"RAX-KSKEY:apiKeyCredentials":{"username":"'$OS_USERNAME'","apiKey":"'$OS_PASSWORD'"}}}' \
+                                 -H "Content-type: application/json" | jq -r .access.token.id)
+fi
+SERVER_ID=$(nova list | grep $1 | awk '{ print $2 }')
+RESPONSE=$(curl https://dfw.servers.api.rackspacecloud.com/v2/$OS_TENANT_NAME/servers/$SERVER_ID/os-instance-actions \
+                -X GET \
+                -H "X-Auth-Token":"$RAC_AUTH_TOKEN" \
+                -H "Content-type: application/json")
+ACTIONS=$RESPONSE
+echo $ACTIONS | jq
