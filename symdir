@@ -1,0 +1,23 @@
+#!/bin/bash
+# used to recursively copy a directory with folders and files as symbolic links
+#./symdir <source_directory> <destination_directory> <set_owner> <set_group>
+
+SOURCE=$1
+DESTINATION=$2
+OWNER=$3
+GROUP=$4
+CREATE=$(find $1 -exec ls --group-directories-first -Fd {} \;)
+
+echo $CREATE
+echo $DESTINATION
+
+for i in $CREATE;
+do
+    if [ -d $i ]; then
+        mkdir $(echo $i | sed "s/${SOURCE//\//\\/}/${DESTINATION//\//\\/}/")
+    else
+        ln -s $i $(echo $i | sed "s/${SOURCE//\//\\/}/${DESTINATION//\//\\/}/")
+    fi
+done
+
+chown -R $OWNER:$GROUP $DESTINATION
