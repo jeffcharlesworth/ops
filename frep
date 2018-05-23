@@ -1,0 +1,26 @@
+#!/bin/bash
+# finds all occurances of given expression and recursively replaces them
+# ./frep <phrase to replace> <replace with> <directory>
+
+DIRECTORY=${3:-$(pwd)}
+REPLACE_THIS=$1
+WITH_THIS=$2
+FILES=$(grep -r $REPLACE_THIS $DIRECTORY | awk -F ":" '{print $1}' | uniq)
+for i in $FILES; do
+    echo "replace?(y/n) $i: "
+    grep $REPLACE_THIS $i
+    read CONFIRM
+    if [[ $CONFIRM = "y" ]];
+    then
+        echo confirmed
+        echo "$i: "
+        echo "$(cat $i | sed "s/$REPLACE_THIS/$WITH_THIS/gI")" > $i
+        cat $i
+    elif [[ $CONFIRM = "n" ]]
+    then
+        echo skipping
+    else
+        echo "enter y or n"
+    fi
+done
+
