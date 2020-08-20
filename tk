@@ -1,0 +1,18 @@
+#!/bin/bash
+
+flag=$1
+
+if [[ $flag = '' ]]; then
+    instance_line=$(awless list instances | fzf -m)
+    private_ip=$(echo $instance_line | awk -F '|' '{print $8}' | sed 's/ //g')
+    ssh -o StrictHostKeyChecking=false ec2-user@${private_ip}
+elif [[ $flag = '-r' ]]; then
+    instance_line=$(awless list databases | fzf)
+    private_ip=$(echo $instance_line | awk -F '|' '{print $2}' | sed 's/ //g')
+    mysql -A -h ${private_ip}.<host>
+elif [[ $flag = '-l' ]]; then
+    instance_line=$(awless list instances | fzf -m --bind ctrl-a:select-all)
+    echo "\n"
+    echo "$instance_line"
+    echo "$instance_line" | pbcopy
+fi

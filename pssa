@@ -1,0 +1,10 @@
+#!/bin/bash
+#pssawesome
+
+stack_name=$1
+cmd=$2
+inventory=`awless list instances --sort Name --filter STATE=running | awk -F '|' '{ print $4" | "$8 }'`
+private_ips=`echo "$inventory" | grep $stack_name`
+ip_string=`echo "$private_ips" | awk -F '|' '{ print $2 }' | tr "\n" " "`
+
+pssh -H "$ip_string" -l ec2-user -O StrictHostKeyChecking=no -i "$2"
